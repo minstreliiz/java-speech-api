@@ -1,6 +1,13 @@
 package com.darkprograms.speech.microphone;
 
-import javax.sound.sampled.AudioFileFormat;
+import java.util.HashMap;
+
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Line;
+import javax.sound.sampled.Mixer;
+import javax.sound.sampled.TargetDataLine;
+
 import com.darkprograms.speech.util.*;
 
 /********************************************************************************************
@@ -11,15 +18,21 @@ import com.darkprograms.speech.util.*;
  * @author Aaron Gokaslan
  ********************************************************************************************/
 
-public class MicrophoneAnalyzer extends Microphone {
+public class MicrophoneAnalyzer {
 
+	// FIX - This part was move from Microphone.
+	/**
+     * TargetDataLine variable to receive data from microphone
+     */
+	private TargetDataLine targetDataLine;
+	// FIX - This part was move from Microphone.
 	/**
 	 * Constructor
 	 * @param fileType The file type you want to save in. FLAC recommended.
 	 */
-	public MicrophoneAnalyzer(AudioFileFormat.Type fileType){
-		super(fileType);
-	}
+	// public MicrophoneAnalyzer(AudioFileFormat.Type fileType){
+	// 	// super(fileType);
+	// }
 	
     /**
      * Gets the volume of the microphone input
@@ -284,5 +297,68 @@ public class MicrophoneAnalyzer extends Microphone {
 	    }
 	    return micBufferData;
 	}
+
+	// Addition - Check Mic.
+	/**
+     * Checks if the Microphone is available
+     */
+    public void checkMicrophoneAvailability() {
+        enumerateMicrophones().forEach((string, info) -> {
+            System.out.println("Name :" + string);
+        });
+    }
+
+    /**
+     * Generates a hashmap to simplify the microphone selection process. The keyset
+     * is the name of the audio device's Mixer The value is the first lineInfo from
+     * that Mixer.
+     * 
+     * @author Aaron Gokaslan (Skylion)
+     * @return The generated hashmap
+     */
+    public static HashMap<String, Line.Info> enumerateMicrophones() {
+        HashMap<String, Line.Info> out = new HashMap<String, Line.Info>();
+        Mixer.Info[] mixerInfos = AudioSystem.getMixerInfo();
+        for (Mixer.Info info : mixerInfos) {
+            Mixer m = AudioSystem.getMixer(info);
+            Line.Info[] lineInfos = m.getTargetLineInfo();
+            if (lineInfos.length >= 1 && lineInfos[0].getLineClass().equals(TargetDataLine.class))// Only adds to
+                                                                                                  // hashmap if it is
+                                                                                                  // audio input device
+                out.put(info.getName(), lineInfos[0]);// Please enjoy my pun
+        }
+        return out;
+    }
+	// Addition - Check Mic.
 	
+	// FIX - This part was move from Microphone.
+	 /**
+     * The audio format to save in
+     *
+     * @return Returns AudioFormat to be used later when capturing audio from
+     *         microphone
+     */
+    public AudioFormat getAudioFormat() {
+        float sampleRate = 44100.0F;
+        // 8000,11025,16000,22050,44100
+        int sampleSizeInBits = 16;
+        // 8,16
+        int channels = 2;
+        // 1,2
+        boolean signed = true;
+        // true,false
+        boolean bigEndian = false;
+        // true,false
+        return new AudioFormat(sampleRate, sampleSizeInBits, channels, signed, bigEndian);
+    }
+	
+	// Getter and Setter.
+    public TargetDataLine getTargetDataLine() {
+        return targetDataLine;
+    }
+
+    public void setTargetDataLine(TargetDataLine targetDataLine) {
+        this.targetDataLine = targetDataLine;
+	}
+	// FIX - This part was move from Microphone.
 }
