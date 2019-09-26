@@ -214,7 +214,7 @@ public class Microphone extends MicrophoneAnalyzer implements Closeable {
                 out = new ByteArrayOutputStream();
                 running = true;
                 boolean delay = false;
-                int delayCount = 2;
+                int delayCount = 3;
                
                 // Temp for 5 file.
                 boolean temp = true;

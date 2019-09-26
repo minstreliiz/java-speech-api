@@ -17,7 +17,7 @@ public class Record {
         }
         try {
             Microphone mic = new Microphone(FLACFileWriter.FLAC);
-            mic.checkMicrophoneAvailability();
+            mic.enumerateMicrophones();
             System.out.println("Recording...");
             mic.recordAudio();
 

@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.DataLine;
 import javax.sound.sampled.Line;
 import javax.sound.sampled.Mixer;
 import javax.sound.sampled.TargetDataLine;
@@ -302,11 +303,12 @@ public class MicrophoneAnalyzer {
 	/**
      * Checks if the Microphone is available
      */
-    public void checkMicrophoneAvailability() {
-        enumerateMicrophones().forEach((string, info) -> {
-            System.out.println("Name :" + string);
-        });
-    }
+    // public void checkMicrophoneAvailability() {
+    //     enumerateMicrophones().forEach((string, info) -> {
+	// 		System.out.println("Name :" + string);
+	// 		System.out.println("info :" + info);
+    //     });
+    // }
 
     /**
      * Generates a hashmap to simplify the microphone selection process. The keyset
@@ -316,19 +318,42 @@ public class MicrophoneAnalyzer {
      * @author Aaron Gokaslan (Skylion)
      * @return The generated hashmap
      */
-    public static HashMap<String, Line.Info> enumerateMicrophones() {
-        HashMap<String, Line.Info> out = new HashMap<String, Line.Info>();
+    public void enumerateMicrophones() {
+        // HashMap<String, Line.Info> out = new HashMap<String, Line.Info>();
         Mixer.Info[] mixerInfos = AudioSystem.getMixerInfo();
         for (Mixer.Info info : mixerInfos) {
-            Mixer m = AudioSystem.getMixer(info);
-            Line.Info[] lineInfos = m.getTargetLineInfo();
+			Mixer m = AudioSystem.getMixer(info);
+			Line.Info[] lineInfos = m.getTargetLineInfo();
+			
             if (lineInfos.length >= 1 && lineInfos[0].getLineClass().equals(TargetDataLine.class))// Only adds to
                                                                                                   // hashmap if it is
-                                                                                                  // audio input device
-                out.put(info.getName(), lineInfos[0]);// Please enjoy my pun
+			{
+				// out.put(info.getName(), lineInfos[0]);// Please enjoy my pun
+				System.out.println("\n Mixer : " + info.getName());
+				System.out.println("detail : " + lineInfos[0]);
+				for (Line.Info nestesdInfo : m.getSourceLineInfo())
+					showLineInfo(nestesdInfo);
+				for (Line.Info nestesdInfo : m.getTargetLineInfo())
+					showLineInfo(nestesdInfo);
+			}
         }
-        return out;
-    }
+        // return out;
+	}
+	
+	private void showLineInfo(final Line.Info lineInfo)
+	{
+		System.out.println("Format that support :");
+
+		if (lineInfo instanceof DataLine.Info)
+		 {
+		   DataLine.Info dataLineInfo = (DataLine.Info)lineInfo;
+		   AudioFormat [] formats = dataLineInfo.getFormats();
+		   
+		   for (final AudioFormat format : formats)
+			 System.out.println("    " + format.toString());
+		 }
+	}
+
 	// Addition - Check Mic.
 	
 	// FIX - This part was move from Microphone.
@@ -339,11 +364,11 @@ public class MicrophoneAnalyzer {
      *         microphone
      */
     public AudioFormat getAudioFormat() {
-        float sampleRate = 44100.0F;
+        float sampleRate = 16000.0F;
         // 8000,11025,16000,22050,44100
         int sampleSizeInBits = 16;
         // 8,16
-        int channels = 2;
+        int channels = 1;
         // 1,2
         boolean signed = true;
         // true,false

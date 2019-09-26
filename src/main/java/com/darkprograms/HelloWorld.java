@@ -44,7 +44,7 @@ public class HelloWorld {
      * whatever you want in the mean time. Show a recording icon or whatever.
      */
     try {
-      mic.checkMicrophoneAvailability();
+      // mic.checkMicrophoneAvailability();
 
       mic.captureAudioToFile(file);
       System.out.println("Recording...");
